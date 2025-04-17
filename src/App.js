@@ -29,6 +29,7 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const API_URL = "http://103.50.205.42:8000/api";
+  // const API_URL = "http://localhost:8000/api"
 
   useEffect(() => {
     fetch(`${API_URL}/model-info/`)
@@ -193,7 +194,7 @@ function App() {
               <Grid item xs={12}>
                 <Box sx={{ mt: 2, p: 2, bgcolor: "#f5f5f5", borderRadius: 1 }}>
                   <Typography variant="h6" align="center">
-                    Таамагласан үнэ: {prediction}
+                    Таамагласан үнэ: {prediction}M
                   </Typography>
                 </Box>
               </Grid>
