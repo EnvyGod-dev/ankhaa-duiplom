@@ -1,18 +1,32 @@
 import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Paper,
+  Typography,
+  Box,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 
 function App() {
-  const [selectedCar, setSelectedCar] = useState("");
   const [maker, setMaker] = useState("");
+  const [makers, setMakers] = useState([]);
   const [fuelType, setFuelType] = useState("");
-  const [mileage, setMileage] = useState("");
+  const [fuels, setFuels] = useState([]);
+
+  const [selectedCar, setSelectedCar] = useState("");
+  const [cars, setCars] = useState([]);
+
   const [engineSize, setEngineSize] = useState(1500);
+  const [mileage, setMileage] = useState("");
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [modelInfo, setModelInfo] = useState({
-    makers: [],
-    cars: [],
-    fuels: [],
-  });
 
   const API_URL = "http://103.50.205.42:8000/api";
 
@@ -20,19 +34,24 @@ function App() {
     fetch(`${API_URL}/model-info/`)
       .then((res) => res.json())
       .then((info) => {
-        setModelInfo({
-          makers: info.allowed_makers,
-          cars: info.allowed_car_names,
-          fuels: info.allowed_fuel_types,
-        });
-
-        // Set defaults
+        setMakers(info.allowed_makers);
+        setFuels(info.allowed_fuel_types);
         setMaker(info.allowed_makers[0]);
         setFuelType(info.allowed_fuel_types[0]);
-        setSelectedCar(info.allowed_car_names[0]);
       })
       .catch((err) => console.error("Model info load error:", err));
   }, []);
+
+  useEffect(() => {
+    if (!maker) return;
+    fetch(`${API_URL}/model-info/?maker=${encodeURIComponent(maker)}`)
+      .then((res) => res.json())
+      .then((info) => {
+        setCars(info.allowed_car_names);
+        setSelectedCar(info.allowed_car_names[0]);
+      })
+      .catch((err) => console.error("Cars load error:", err));
+  }, [maker]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,26 +59,22 @@ function App() {
     setPrediction(null);
 
     try {
-      const response = await fetch(`${API_URL}/predict/`, {
+      const res = await fetch(`${API_URL}/predict/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           registration_year: 2022,
           manufacture_year: 2022,
-          maker: maker,
+          maker,
           car_name: selectedCar,
           fuel_type: fuelType,
-          engine_size: parseInt(engineSize),
-          odometer: parseInt(mileage),
+          engine_size: parseInt(engineSize, 10),
+          odometer: parseInt(mileage, 10),
         }),
       });
-
-      const data = await response.json();
-      setPrediction(data.predicted_price || "Алдаа гарлаа!");
-    } catch (error) {
-      console.error("Error fetching prediction:", error);
+      const { predicted_price } = await res.json();
+      setPrediction(predicted_price ? `${predicted_price}₮` : "Алдаа гарлаа!");
+    } catch {
       setPrediction("Алдаа гарлаа!");
     } finally {
       setLoading(false);
@@ -67,128 +82,127 @@ function App() {
   };
 
   return (
-    <div style={styles.container}>
-      <h1>Автомашины үнэ, үнэлгээний таамаг</h1>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <label>
-          Машины нэр:
-          <select
-            value={selectedCar}
-            onChange={(e) => setSelectedCar(e.target.value)}
-            required
-            style={styles.input}
-          >
-            {modelInfo.cars.map((car, index) => (
-              <option key={index} value={car}>
-                {car}
-              </option>
-            ))}
-          </select>
-        </label>
+    <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Typography variant="h5" gutterBottom align="center">
+          Автомашины үнэ, үнэлгээний таамаг
+        </Typography>
 
-        <label>
-          Үйлдвэрлэгч:
-          <select
-            value={maker}
-            onChange={(e) => setMaker(e.target.value)}
-            required
-            style={styles.input}
-          >
-            {modelInfo.makers.map((m, index) => (
-              <option key={index} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Grid container spacing={2}>
+            {/* Maker */}
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel id="maker-label">Үйлдвэрлэгч</InputLabel>
+                <Select
+                  labelId="maker-label"
+                  value={maker}
+                  label="Үйлдвэрлэгч"
+                  onChange={(e) => setMaker(e.target.value)}
+                  required
+                >
+                  {makers.map((m) => (
+                    <MenuItem key={m} value={m}>
+                      {m}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
-        <label>
-          Түлшний төрөл:
-          <select
-            value={fuelType}
-            onChange={(e) => setFuelType(e.target.value)}
-            required
-            style={styles.input}
-          >
-            {modelInfo.fuels.map((fuel, index) => (
-              <option key={index} value={fuel}>
-                {fuel}
-              </option>
-            ))}
-          </select>
-        </label>
+            {/* Car (dependent) */}
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel id="car-label">Машины нэр</InputLabel>
+                <Select
+                  labelId="car-label"
+                  value={selectedCar}
+                  label="Машины нэр"
+                  onChange={(e) => setSelectedCar(e.target.value)}
+                  required
+                >
+                  {cars.map((c) => (
+                    <MenuItem key={c} value={c}>
+                      {c}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
-        <label>
-          Хөдөлгүүрийн багтаамж (cc):
-          <input
-            type="number"
-            value={engineSize}
-            onChange={(e) => setEngineSize(e.target.value)}
-            required
-            style={styles.input}
-          />
-        </label>
+            {/* Fuel type */}
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel id="fuel-label">Түлшний төрөл</InputLabel>
+                <Select
+                  labelId="fuel-label"
+                  value={fuelType}
+                  label="Түлшний төрөл"
+                  onChange={(e) => setFuelType(e.target.value)}
+                  required
+                >
+                  {fuels.map((f) => (
+                    <MenuItem key={f} value={f}>
+                      {f}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
-        <label>
-          Км гүйлт:
-          <input
-            type="number"
-            value={mileage}
-            onChange={(e) => setMileage(e.target.value)}
-            required
-            style={styles.input}
-          />
-        </label>
+            {/* Engine size */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Хөдөлгүүрийн багтаамж (cc)"
+                value={engineSize}
+                onChange={(e) => setEngineSize(Number(e.target.value))}
+                required
+              />
+            </Grid>
 
-        <button type="submit" style={styles.button}>
-          {loading ? "Болж байна..." : "Таамаглах"}
-        </button>
-      </form>
+            {/* Mileage */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Км гүйлт"
+                value={mileage}
+                onChange={(e) => setMileage(e.target.value)}
+                required
+              />
+            </Grid>
 
-      {prediction && (
-        <div style={styles.result}>
-          <h2>Таамагласан үнэ: {prediction}₮</h2>
-        </div>
-      )}
-    </div>
+            {/* Submit */}
+            <Grid item xs={12}>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                size="large"
+                disabled={loading}
+                startIcon={loading ? <CircularProgress size={20} /> : null}
+              >
+                {loading ? "Таамаглаж байна..." : "Таамаглах"}
+              </Button>
+            </Grid>
+
+            {/* Result */}
+            {prediction && (
+              <Grid item xs={12}>
+                <Box sx={{ mt: 2, p: 2, bgcolor: "#f5f5f5", borderRadius: 1 }}>
+                  <Typography variant="h6" align="center">
+                    Таамагласан үнэ: {prediction}
+                  </Typography>
+                </Box>
+              </Grid>
+            )}
+          </Grid>
+        </Box>
+      </Paper>
+    </Container>
   );
 }
-
-const styles = {
-  container: {
-    textAlign: "center",
-    padding: "20px",
-    fontFamily: "Arial, sans-serif",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "10px",
-    maxWidth: "400px",
-    margin: "auto",
-  },
-  input: {
-    width: "100%",
-    padding: "8px",
-    marginBottom: "10px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-  },
-  button: {
-    padding: "10px 15px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-  result: {
-    marginTop: "20px",
-    padding: "10px",
-    borderRadius: "5px",
-    backgroundColor: "#f8f9fa",
-  },
-};
 
 export default App;
