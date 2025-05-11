@@ -44,7 +44,7 @@ function App() {
   const [chartData, setChartData] = useState([]);
   const [currentPrediction, setCurrentPrediction] = useState(null);
 
-  const API_URL = "http://http://103.50.205.42:8000/api";
+  const API_URL = "http://103.50.205.42:8000/api";
 
   useEffect(() => {
     fetch(`${API_URL}/model-info/`)
