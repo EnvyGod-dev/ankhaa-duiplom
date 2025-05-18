@@ -11,7 +11,7 @@ import {
     CircularProgress
 } from '@mui/material';
 
-const API_URL = 'http://103.50.205.42:8000/api';
+const API_URL = 'http://103.50.205.86:8000/api';
 
 export default function RegisterPage() {
     const [username, setUsername] = useState('');

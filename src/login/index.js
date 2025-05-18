@@ -11,7 +11,7 @@ import {
     CircularProgress
 } from '@mui/material';
 
-const API_URL = 'http://103.50.205.42:8000/api';
+const API_URL = 'http://103.50.205.86:8000/api';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
@@ -31,9 +31,10 @@ export default function LoginPage() {
                 body: JSON.stringify({ username, password })
             });
             if (!res.ok) throw new Error('Нэвтрэх амжилтгүй боллоо');
-            const { token } = await res.json();
-            localStorage.setItem('token', token);
-            navigate('/', { replace: true });
+            const { access, refresh } = await res.json();
+localStorage.setItem('access', access);
+localStorage.setItem('refresh', refresh);
+navigate('/', { replace: true });
         } catch (err) {
             setError(err.message);
         } finally {

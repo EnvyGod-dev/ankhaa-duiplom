@@ -8,7 +8,7 @@ function SalesPrediction() {
 
   // Backend-с машины жагсаалтыг авах
   useEffect(() => {
-    fetch("http://103.50.205.42:8000/api/cars/")
+    fetch("http://103.50.205.86:8000/api/cars/")
       .then((response) => response.json())
       .then((data) => {
         console.log("Fetched cars:", data);  // Алдааг шалгахын тулд лог гаргах
