@@ -8,9 +8,10 @@ import {
   Divider,
   Stack,
   Chip,
-  Rating
+  Rating,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-// Import icons from @mui/icons-material package
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import SpeedIcon from '@mui/icons-material/Speed';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
@@ -25,7 +26,7 @@ const carListings = [
     mileage: '45,000',
     price: '¥2,500,000',
     fuel: 'Petrol',
-    condition: '4.5/5'
+    condition: '4.5',
   },
   {
     id: 2,
@@ -36,7 +37,7 @@ const carListings = [
     mileage: '35,000',
     price: '¥2,300,000',
     fuel: 'Hybrid',
-    condition: '4.7/5'
+    condition: '4.7',
   },
   {
     id: 3,
@@ -47,7 +48,7 @@ const carListings = [
     mileage: '15,000',
     price: '¥4,800,000',
     fuel: 'Hybrid',
-    condition: '4.9/5'
+    condition: '4.9',
   },
   {
     id: 4,
@@ -58,25 +59,30 @@ const carListings = [
     mileage: '55,000',
     price: '¥3,200,000',
     fuel: 'Petrol',
-    condition: '4.3/5'
-  }
+    condition: '4.3',
+  },
 ];
 
 const CarListings = ({ position = 'left' }) => {
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
     <Box
       sx={{
-        width: 300,
-        height: '100vh',
+        width: isSmall ? '100%' : 300,
+        height: isSmall ? 'auto' : '100vh',
         overflowY: 'auto',
         bgcolor: 'background.paper',
-        position: 'fixed',
-        [position]: 0,
-        top: 64,
-        borderRight: position === 'left' ? 1 : 0,
-        borderLeft: position === 'right' ? 1 : 0,
+        position: isSmall ? 'relative' : 'fixed',
+        top: isSmall ? 'auto' : '64px',
+        left: !isSmall && position === 'left' ? 0 : 'auto',
+        right: !isSmall && position === 'right' ? 0 : 'auto',
+        borderRight: !isSmall && position === 'left' ? 1 : 0,
+        borderLeft: !isSmall && position === 'right' ? 1 : 0,
         borderColor: 'divider',
         p: 2,
+        mb: isSmall ? 2 : 0,
         '&::-webkit-scrollbar': {
           width: '8px',
         },
@@ -87,19 +93,18 @@ const CarListings = ({ position = 'left' }) => {
         '&::-webkit-scrollbar-thumb': {
           background: '#888',
           borderRadius: '4px',
-          '&:hover': {
-            background: '#555',
-          },
+          '&:hover': { background: '#555' },
         },
       }}
     >
-      <Typography 
-        variant="h6" 
-        gutterBottom 
-        sx={{ 
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{
           fontWeight: 600,
           color: 'primary.main',
-          pb: 1
+          pb: 1,
+          textAlign: isSmall ? 'center' : 'left',
         }}
       >
         {position === 'left' ? '🚗 Шинэ зарууд' : '🌟 Онцлох зарууд'}
@@ -107,11 +112,11 @@ const CarListings = ({ position = 'left' }) => {
       <Divider sx={{ mb: 2 }} />
       <Stack spacing={2}>
         {carListings.map((car) => (
-          <Card 
-            key={car.id} 
-            sx={{ 
+          <Card
+            key={car.id}
+            sx={{
               boxShadow: 2,
-              transition: 'all 0.3s ease-in-out',
+              transition: 'transform 0.3s, box-shadow 0.3s',
               '&:hover': {
                 transform: 'translateY(-4px)',
                 boxShadow: 4,
@@ -127,77 +132,58 @@ const CarListings = ({ position = 'left' }) => {
               alt={`${car.maker} ${car.model}`}
               sx={{
                 objectFit: 'cover',
-                transition: 'transform 0.3s ease-in-out',
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                }
+                transition: 'transform 0.3s',
+                '&:hover': { transform: 'scale(1.05)' },
               }}
             />
             <CardContent>
-              <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{ 
-                  fontWeight: 600,
-                  fontSize: '1.1rem',
-                  color: 'text.primary'
-                }}
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{ fontWeight: 600, fontSize: '1.1rem' }}
               >
                 {car.maker} {car.model}
               </Typography>
-              <Stack direction="row" spacing={0.5} mb={2} flexWrap="wrap" gap={0.5}>
-                <Chip 
-                  size="small" 
-                  icon={<DirectionsCarIcon />} 
+              <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                <Chip
+                  size="small"
+                  icon={<DirectionsCarIcon />}
                   label={car.year}
-                  sx={{
-                    borderRadius: '8px',
-                    '& .MuiChip-icon': { fontSize: 16 }
-                  }}
+                  sx={{ borderRadius: '8px' }}
                 />
-                <Chip 
-                  size="small" 
-                  icon={<SpeedIcon />} 
+                <Chip
+                  size="small"
+                  icon={<SpeedIcon />}
                   label={`${car.mileage} km`}
-                  sx={{
-                    borderRadius: '8px',
-                    '& .MuiChip-icon': { fontSize: 16 }
-                  }}
+                  sx={{ borderRadius: '8px' }}
                 />
-                <Chip 
-                  size="small" 
-                  icon={<LocalGasStationIcon />} 
+                <Chip
+                  size="small"
+                  icon={<LocalGasStationIcon />}
                   label={car.fuel}
-                  sx={{
-                    borderRadius: '8px',
-                    '& .MuiChip-icon': { fontSize: 16 }
-                  }}
+                  sx={{ borderRadius: '8px' }}
                 />
               </Stack>
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column',
-                gap: 1
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box mt={2}>
+                <Stack direction="row" alignItems="center" spacing={1}>
                   <Typography variant="body2" color="text.secondary">
                     Нөхцөл:
                   </Typography>
-                  <Rating 
-                    value={parseFloat(car.condition)} 
-                    precision={0.1} 
-                    size="small" 
-                    readOnly 
+                  <Rating
+                    value={parseFloat(car.condition)}
+                    precision={0.1}
+                    size="small"
+                    readOnly
                   />
-                </Box>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
+                </Stack>
+                <Typography
+                  variant="h6"
+                  sx={{
                     color: 'primary.main',
                     fontWeight: 600,
                     fontSize: '1.2rem',
-                    textAlign: 'right',
-                    mt: 1
+                    textAlign: isSmall ? 'center' : 'right',
+                    mt: 1,
                   }}
                 >
                   {car.price}
@@ -211,4 +197,4 @@ const CarListings = ({ position = 'left' }) => {
   );
 };
 
-export default CarListings; 
+export default CarListings;
