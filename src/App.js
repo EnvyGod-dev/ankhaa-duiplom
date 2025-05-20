@@ -355,15 +355,6 @@ function App() {
           </Paper>
         )}
 
-        {/* Price Calculator */}
-        <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h6" gutterBottom>
-            Total Cost Calculator
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <PriceCalculator predictedPrice={predictedPrice} />
-        </Paper>
-
         {/* Time-Series Chart */}
         {timeSeriesData.length > 0 && (
           <Box mt={6}>
@@ -389,6 +380,15 @@ function App() {
             </ResponsiveContainer>
           </Box>
         )}
+        {/* Price Calculator */}
+        <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            Total Cost Calculator
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <PriceCalculator predictedPrice={predictedPrice} />
+        </Paper>
+
       </Container>
     </>
   );
